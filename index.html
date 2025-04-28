@@ -10,7 +10,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.2.0/firebase-firestore.js"></script>
 
   <style>
-    /* Base y reset */
+    /* Reset y estilos base */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background: #121212;
@@ -24,7 +24,7 @@
       font-size: 1.5rem;
     }
 
-    /* Contenedor */
+    /* Contenedor central */
     .container {
       max-width: 480px;
       margin: auto;
@@ -57,6 +57,8 @@
     input:invalid {
       border-color: #f44336;
     }
+
+    /* Estilo de compromisos con checkbox a la derecha */
     fieldset {
       border: none;
       margin-top: 0.5rem;
@@ -68,12 +70,12 @@
     }
     .checkbox-group {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
+      padding: 0.5rem 0;
     }
-    .checkbox-group small {
-      color: #bbb;
+    .checkbox-group span {
+      flex: 1;
     }
 
     /* Botón */
@@ -117,25 +119,25 @@
       <fieldset>
         <legend>Compromisos</legend>
         <label class="checkbox-group">
-          <input type="checkbox" id="promotor">
           <span>
             <strong>Promotor</strong><br>
             <small>Ser promotor del candidato con mis amigos y familia</small>
           </span>
+          <input type="checkbox" id="promotor">
         </label>
         <label class="checkbox-group">
-          <input type="checkbox" id="colabora">
           <span>
             <strong>Colaborar en actividades</strong><br>
             <small>Eventos, volanteo, etc.</small>
           </span>
+          <input type="checkbox" id="colabora">
         </label>
         <label class="checkbox-group">
-          <input type="checkbox" id="whatsapp">
           <span>
             <strong>Grupo de Whatsapp</strong><br>
             <small>Recibir información por este medio</small>
           </span>
+          <input type="checkbox" id="whatsapp">
         </label>
       </fieldset>
 
@@ -144,7 +146,7 @@
   </div>
 
   <script>
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    // === Tu configuración de Firebase (copiada de la consola) ===
     const firebaseConfig = {
       apiKey: "AIzaSyBUtcNQJZUTJ5bJquwJGCzmPyMz-X6q6Yk",
       authDomain: "paul16-f649c.firebaseapp.com",
@@ -153,17 +155,16 @@
       messagingSenderId: "318651915512",
       appId: "1:318651915512:web:e4ae781d9a40225208ef0d",
       measurementId: "G-VDGLK5YR1K"
-};
     };
+    // Inicializa Firebase y Firestore
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // === Manejo de envío ===
+    // === Manejo de envío del formulario ===
     const form = document.getElementById('form');
     form.addEventListener('submit', async e => {
       e.preventDefault();
       if (!form.checkValidity()) {
-        // Deja que el navegador muestre errores de validación
         form.reportValidity();
         return;
       }
@@ -193,4 +194,3 @@
   </script>
 </body>
 </html>
-
