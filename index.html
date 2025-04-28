@@ -2,98 +2,209 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>Registro INE con Firestore</title>
-
-  <!-- ZXing para decodificar PDF417 -->
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Registro INE (Responsive)</title>
+  <!-- ZXing UMD (sin módulos) -->
   <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
   <!-- Firebase App (core) -->
   <script src="https://www.gstatic.com/firebasejs/10.2.0/firebase-app.js"></script>
-  <!-- Firestore -->
   <script src="https://www.gstatic.com/firebasejs/10.2.0/firebase-firestore.js"></script>
-  
+
   <style>
-    body { font-family: sans-serif; max-width: 400px; margin: auto; padding: 1rem; }
-    video { border: 1px solid #ccc; width: 100%; height: auto; }
-    form { margin-top: 1rem; }
-    label { display: block; margin: .5rem 0; }
-    input[readonly] { background: #f9f9f9; }
-    button { margin-top: .5rem; padding: .5rem 1rem; }
+    /* Reset y base */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: sans-serif;
+      background: #121212; color: #eee;
+      padding: 1rem;
+    }
+    h1 { text-align: center; margin-bottom: 1rem; }
+
+    /* Contenedor responsive */
+    .container {
+      max-width: 480px;
+      margin: auto;
+      background: #1e1e1e;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 4px;
+      background: #000;
+    }
+
+    button {
+      width: 48%;
+      padding: .75rem;
+      margin: .5rem 1%;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button.primary { background: #2962ff; color: #fff; }
+    button.secondary { background: #424242; color: #fff; }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+      margin-top: 1rem;
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      font-size: .9rem;
+    }
+    input {
+      padding: .75rem;
+      border: 1px solid #333;
+      border-radius: 4px;
+      background: #2c2c2c;
+      color: #eee;
+      font-size: 1rem;
+    }
+    input:read-only { background: #3a3a3a; }
+    .actions { display: flex; justify-content: space-between; flex-wrap: wrap; }
+
+    @media (max-width: 400px) {
+      button { width: 100%; margin: .5rem 0; }
+    }
   </style>
 </head>
 <body>
-  <h1>Registro INE</h1>
+  <div class="container">
+    <h1>Registro INE</h1>
 
-  <!-- 1) Vista de cámara -->
-  <video id="video" autoplay muted></video>
-  <button id="startCamera">Abrir cámara</button>
-  <button id="scan">Escanear INE</button>
+    <!-- Vista de cámara + carga de imagen -->
+    <video id="video" autoplay muted></video>
+    <div class="actions">
+      <button id="startCamera" type="button" class="primary">Abrir cámara</button>
+      <button id="scan" type="button" class="secondary">Escanear INE</button>
+      <!-- Fallback: subir foto de INE si cámara no funciona -->
+      <input id="fileInput" type="file" accept="image/*" capture="environment"
+             style="flex:1 1 100%; margin-top:.5rem;" />
+    </div>
 
-  <!-- 2) Formulario de datos -->
-  <form id="form">
-    <label>Nombre completo: <input type="text" id="nombre" readonly></label>
-    <label>CURP:             <input type="text" id="curp" readonly></label>
-    <label>Clave Elector:    <input type="text" id="clave" readonly></label>
-    <hr>
-    <label>Correo:           <input type="email" id="email" required></label>
-    <label>Teléfono:         <input type="tel" id="telefono" required></label>
-    <button type="submit">Guardar en Firestore</button>
-  </form>
+    <!-- Formulario -->
+    <form id="form">
+      <label>
+        Nombre completo
+        <input type="text" id="nombre" readonly>
+      </label>
+      <label>
+        CURP
+        <input type="text" id="curp" readonly>
+      </label>
+      <label>
+        Clave Elector
+        <input type="text" id="clave" readonly>
+      </label>
+      <label>
+        Correo electrónico
+        <input type="email" id="email" placeholder="ejemplo@dominio.com" required>
+      </label>
+      <label>
+        Teléfono (10 dígitos)
+        <input type="tel" id="telefono" placeholder="55XXXXXXXX" pattern="[0-9]{10}" required>
+      </label>
+      <button type="submit" class="primary">Guardar en Firestore</button>
+    </form>
+  </div>
 
   <script>
-    // --- Inicialización de Firebase ---
+    // --- Inicializa Firebase ---
     const firebaseConfig = {
       apiKey: "TU_API_KEY",
       authDomain: "TU_PROYECTO.firebaseapp.com",
       projectId: "TU_PROYECTO",
-      // resto de tu configuración...
+      // …
     };
-    const app = firebase.initializeApp(firebaseConfig);
-    const db  = firebase.firestore(app);
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    // --- ZXing para leer el PDF417 ---
+    // --- ZXing (UMD) ---
     const codeReader = new ZXing.BrowserBarcodeReader();
     const video      = document.getElementById('video');
+    const fileInput  = document.getElementById('fileInput');
 
     document.getElementById('startCamera').addEventListener('click', async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" }
+        });
         video.srcObject = stream;
       } catch (err) {
-        alert('No se pudo acceder a la cámara: ' + err);
+        alert('No se pudo acceder a la cámara: ' + err.message);
       }
     });
+
+    async function decodeFromVideo() {
+      try {
+        const result = await codeReader.decodeOnceFromVideoDevice(
+          undefined, video
+        );
+        return result.text;
+      } catch {
+        throw new Error('No se detectó el código');
+      }
+    }
+
+    async function decodeFromFile(file) {
+      try {
+        const result = await codeReader.decodeFromImage(file);
+        return result.text;
+      } catch {
+        throw new Error('No se pudo leer el archivo, elige otra foto.');
+      }
+    }
 
     document.getElementById('scan').addEventListener('click', async () => {
       try {
-        const result = await codeReader.decodeOnceFromVideoDevice(undefined, video);
-        const parts = result.text.split('|');
-        // Ajusta índices si el formato difiere
-        document.getElementById('curp')  .value = parts[1] || '';
-        document.getElementById('nombre').value = (parts[3] + ' ' + parts[2]).trim();
-        document.getElementById('clave') .value = parts[5] || '';
+        const text = await decodeFromVideo();
+        fillFields(text);
       } catch (e) {
-        alert('No se detectó el código. Mejora la iluminación o acércate más.');
+        alert(e.message);
       }
     });
 
-    // --- Guardar en Firestore ---
+    fileInput.addEventListener('change', async () => {
+      if (!fileInput.files.length) return;
+      try {
+        const text = await decodeFromFile(fileInput.files[0]);
+        fillFields(text);
+      } catch (e) {
+        alert(e.message);
+      }
+    });
+
+    function fillFields(raw) {
+      const parts = raw.split('|');
+      document.getElementById('curp')  .value = parts[1] || '';
+      document.getElementById('nombre').value = (parts[3] + ' ' + parts[2]).trim();
+      document.getElementById('clave') .value = parts[5] || '';
+    }
+
+    // --- Envío a Firestore ---
     document.getElementById('form').addEventListener('submit', async e => {
       e.preventDefault();
       const data = {
         nombre:   document.getElementById('nombre').value,
-        curp:     document.getElementById('curp')  .value,
-        clave:    document.getElementById('clave') .value,
-        email:    document.getElementById('email') .value,
+        curp:     document.getElementById('curp').value,
+        clave:    document.getElementById('clave').value,
+        email:    document.getElementById('email').value,
         telefono: document.getElementById('telefono').value,
         fecha:    firebase.firestore.Timestamp.now()
       };
       try {
         await db.collection('usuarios').add(data);
-        alert('¡Registro guardado en Firestore!');
-        // Opcional: limpiar formulario o redirigir
+        alert('¡Registro guardado!');
+        e.target.reset();
       } catch (err) {
         console.error(err);
-        alert('Error al guardar en la base de datos.');
+        alert('Error guardando datos.');
       }
     });
   </script>
