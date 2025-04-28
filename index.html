@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Registro de Compromisos</title>
+  <title>Red de apoyo Paul Moriel</title>
 
-  <!-- Firebase UMD -->
-  <script src="https://www.gstatic.com/firebasejs/10.2.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.2.0/firebase-firestore.js"></script>
+  <!-- Firebase UMD “compat” para exponer global `firebase` -->
+  <script src="https://www.gstatic.com/firebasejs/10.2.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.2.0/firebase-firestore-compat.js"></script>
 
   <style>
     /* Reset y estilos base */
@@ -67,26 +67,23 @@
       border-color: #f44336;
     }
 
-    /* Compromisos con checkbox a la derecha */
-    fieldset {
-      border: none;
+    /* Imagen sección */
+    .section-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 4px;
       margin-top: 0.5rem;
-      padding: 0;
+      margin-bottom: 1rem;
     }
-    legend {
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-    }
-    .checkbox-group {
-      /* Override al label genérico para flex-direction:column */
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.5rem 0;
-    }
-    .checkbox-group span {
-      flex: 1;
+
+    /* Mensaje de agradecimiento */
+    #thanksMessage {
+      display: none;
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 1.2rem;
+      color: #a5d6a7;
     }
 
     /* Botón */
@@ -111,7 +108,8 @@
     <!-- Banner arriba -->
     <img src="banner.jpg" alt="Paul Moriel #16" class="banner">
 
-    <h1>Registro de Compromisos</h1>
+    <h1>Red de apoyo Paul Moriel</h1>
+
     <form id="form">
       <label>
         Nombre completo *
@@ -121,6 +119,10 @@
         Sección
         <input type="text" id="seccion" placeholder="Ej. 1010">
       </label>
+
+      <!-- Imagen justo debajo de Sección -->
+      <img src="seccion.jpg" alt="Sección" class="section-image">
+
       <label>
         Celular *<small>(10 dígitos)</small>
         <input type="tel" id="telefono" placeholder="5512345678" pattern="[0-9]{10}" required>
@@ -130,33 +132,10 @@
         <input type="email" id="email" placeholder="ejemplo@dominio.com">
       </label>
 
-      <fieldset>
-        <legend>Compromisos</legend>
-        <label class="checkbox-group">
-          <span>
-            <strong>Promotor</strong><br>
-            <small>Ser promotor del candidato con mis amigos y familia</small>
-          </span>
-          <input type="checkbox" id="promotor">
-        </label>
-        <label class="checkbox-group">
-          <span>
-            <strong>Colaborar en actividades</strong><br>
-            <small>Eventos, volanteo, etc.</small>
-          </span>
-          <input type="checkbox" id="colabora">
-        </label>
-        <label class="checkbox-group">
-          <span>
-            <strong>Grupo de Whatsapp</strong><br>
-            <small>Recibir información por este medio</small>
-          </span>
-          <input type="checkbox" id="whatsapp">
-        </label>
-      </fieldset>
-
       <button type="submit">Enviar</button>
     </form>
+
+    <div id="thanksMessage">Muchas gracias por tu apoyo</div>
   </div>
 
   <script>
@@ -176,6 +155,8 @@
 
     // === Manejo de envío del formulario ===
     const form = document.getElementById('form');
+    const thanksMessage = document.getElementById('thanksMessage');
+
     form.addEventListener('submit', async e => {
       e.preventDefault();
       if (!form.checkValidity()) {
@@ -188,20 +169,16 @@
         seccion:  document.getElementById('seccion').value.trim(),
         telefono: document.getElementById('telefono').value.trim(),
         email:    document.getElementById('email').value.trim(),
-        compromisos: {
-          promotor:  document.getElementById('promotor').checked,
-          colabora:  document.getElementById('colabora').checked,
-          whatsapp:  document.getElementById('whatsapp').checked
-        },
-        fecha: firebase.firestore.Timestamp.now()
+        fecha:    firebase.firestore.Timestamp.now()
       };
 
       try {
         await db.collection('usuarios').add(registro);
-        alert('¡Registro enviado con éxito!');
-        form.reset();
+        // Ocultar el formulario y mostrar el mensaje de agradecimiento
+        form.style.display = 'none';
+        thanksMessage.style.display = 'block';
       } catch (err) {
-        console.error(err);
+        console.error('Error guardando en Firestore:', err);
         alert('Ocurrió un error al guardar. Intenta de nuevo.');
       }
     });
