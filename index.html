@@ -25,7 +25,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.2.0/firebase-firestore-compat.js"></script>
 
   <style>
-    * { box-sizing: border-box; margin:0; padding:0 }
+    * { box‐sizing: border-box; margin: 0; padding: 0 }
     body {
       background: #121212;
       color: #eee;
@@ -82,6 +82,7 @@
       line-height: 1.4;
       color: #ccc;
       margin-top: 1rem;
+      text-align: justify;
     }
     button {
       margin-top: 1rem;
@@ -139,7 +140,7 @@
   </div>
 
   <script>
-    // 1) Configura Firebase
+    // Configura Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBUtcNQJZUTJ5bJquwJGCzmPyMz-X6q6Yk",
       authDomain: "paul16-f649c.firebaseapp.com",
@@ -152,7 +153,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 2) Envío y validación
+    // Envío y validación
     const form = document.getElementById('form');
     const thanks = document.getElementById('thanks');
     form.addEventListener('submit', async e => {
@@ -162,22 +163,16 @@
         return;
       }
 
-      const data = {
+      await db.collection('usuarios').add({
         nombre:    document.getElementById('nombre').value.trim(),
         municipio: document.getElementById('municipio').value.trim(),
         seccion:   document.getElementById('seccion').value.trim(),
         telefono:  document.getElementById('telefono').value.trim(),
         fecha:     firebase.firestore.Timestamp.now()
-      };
+      });
 
-      try {
-        await db.collection('usuarios').add(data);
-        form.style.display = 'none';
-        thanks.style.display = 'block';
-      } catch(err) {
-        console.error(err);
-        alert('Ocurrió un error al guardar. Intenta de nuevo.');
-      }
+      form.style.display = 'none';
+      thanks.style.display = 'block';
     });
   </script>
 </body>
