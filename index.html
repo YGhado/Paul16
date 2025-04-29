@@ -23,7 +23,7 @@
   <meta name="twitter:card"          content="summary_large_image" />
   <meta name="twitter:title"         content="Red de apoyo Paul Moriel" />
   <meta name="twitter:description"   content="Únete a la red de apoyo de Paul Moriel y registra tu sección." />
-  <meta name="twitter:image"         content="https://ygahdo.github.io/Paul16/banner.jpg" />
+  <meta name="twitter:image"         content="https://yghado.github.io/Paul16/banner.jpg" />
   <meta name="twitter:image:alt"     content="Banner Red de apoyo Paul Moriel" />
 
   <!-- Firebase UMD compat -->
@@ -132,16 +132,15 @@
         Celular * (10 dígitos)
         <input type="tel" id="telefono" required pattern="[0-9]{10}" placeholder="5512345678">
       </label>
+      <label>
+        ¿Quién te invitó a registrarte? *
+        <input type="text" id="invitado" required placeholder="Nombre de quien te invitó">
+      </label>
 
       <div class="privacy">
         <strong>Aviso de privacidad:</strong><br>
-        Los datos personales recabados a través de este formulario serán
-        utilizados únicamente para fines informativos y de organización relacionados
-        con el apoyo a Paúl Daniel Moriel Quiralte en el proceso electoral
-        correspondiente. La información será tratada con estricta confidencialidad
-        y no será compartida con terceros sin tu consentimiento.<br>
-        Al proporcionar tus datos, aceptas el tratamiento de los mismos conforme
-        a este aviso.
+        Los datos personales recabados a través de este formulario serán utilizados únicamente para fines informativos y de organización relacionados con el apoyo a Paúl Daniel Moriel Quiralte en el proceso electoral correspondiente. La información será tratada con estricta confidencialidad y no será compartida con terceros sin tu consentimiento.<br>
+        Al proporcionar tus datos, aceptas el tratamiento de los mismos conforme a este aviso.
       </div>
 
       <button type="submit">Enviar</button>
@@ -179,6 +178,7 @@
         municipio: document.getElementById('municipio').value.trim(),
         seccion:   document.getElementById('seccion').value.trim(),
         telefono:  document.getElementById('telefono').value.trim(),
+        invitado:  document.getElementById('invitado').value.trim(),
         fecha:     firebase.firestore.Timestamp.now()
       });
 
