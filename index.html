@@ -4,10 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-  <!-- Título de la pestaña -->
   <title>Red de apoyo Paul Moriel</title>
 
-  <!-- Open Graph (para vista previa en WhatsApp, etc.) -->
+  <!-- Open Graph (para vista previa al compartir) -->
   <meta property="og:title"       content="Red de apoyo Paul Moriel" />
   <meta property="og:description" content="Únete a la red de apoyo de Paul Moriel y registra tu sección." />
   <meta property="og:type"        content="website" />
@@ -26,7 +25,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.2.0/firebase-firestore-compat.js"></script>
 
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin:0; padding:0 }
     body {
       background: #121212;
       color: #eee;
@@ -59,7 +58,6 @@
       flex-direction: column;
       font-size: .9rem;
     }
-    /* Bordes siempre blancos por defecto, rojos si invalid */
     input {
       padding: .75rem;
       border: 1px solid #fff;
@@ -75,6 +73,15 @@
       width: 100%;
       border-radius: 4px;
       margin: .5rem 0 1rem;
+    }
+    .privacy {
+      background: #2c2c2c;
+      padding: 1rem;
+      border-radius: 4px;
+      font-size: .8rem;
+      line-height: 1.4;
+      color: #ccc;
+      margin-top: 1rem;
     }
     button {
       margin-top: 1rem;
@@ -106,14 +113,25 @@
         <input type="text" id="nombre" required placeholder="Ingresa tu nombre completo">
       </label>
       <label>
+        Municipio *
+        <input type="text" id="municipio" required placeholder="Ej. Ciudad de México">
+      </label>
+      <label>
         Sección *
         <input type="text" id="seccion" required placeholder="Ej. 1010">
       </label>
-      <img src="seccion.jpg" alt="Sección" class="section-image">
+      <img src="seccion.jpg" alt="Cómo ubicar tu sección" class="section-image">
       <label>
         Celular * (10 dígitos)
         <input type="tel" id="telefono" required pattern="[0-9]{10}" placeholder="5512345678">
       </label>
+
+      <div class="privacy">
+        <strong>Aviso de privacidad:</strong><br>
+        Los datos personales recabados a través de este formulario serán utilizados únicamente para fines informativos y de organización relacionados con el apoyo a Paúl Daniel Moriel Quiralte en el proceso electoral correspondiente. La información será tratada con estricta confidencialidad y no será compartida con terceros sin tu consentimiento.<br>
+        Al proporcionar tus datos, aceptas el tratamiento de los mismos conforme a este aviso.
+      </div>
+
       <button type="submit">Enviar</button>
     </form>
 
@@ -139,17 +157,17 @@
     const thanks = document.getElementById('thanks');
     form.addEventListener('submit', async e => {
       e.preventDefault();
-      // Forzar validación HTML5: pinta de rojo el que falte
       if (!form.checkValidity()) {
         form.reportValidity();
         return;
       }
 
       const data = {
-        nombre:   nombre.value.trim(),
-        seccion:  seccion.value.trim(),
-        telefono: telefono.value.trim(),
-        fecha:    firebase.firestore.Timestamp.now()
+        nombre:    document.getElementById('nombre').value.trim(),
+        municipio: document.getElementById('municipio').value.trim(),
+        seccion:   document.getElementById('seccion').value.trim(),
+        telefono:  document.getElementById('telefono').value.trim(),
+        fecha:     firebase.firestore.Timestamp.now()
       };
 
       try {
